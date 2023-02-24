@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include beer30.java"
+      include_role:
+        name: "beer30.java"

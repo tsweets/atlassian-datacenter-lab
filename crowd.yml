@@ -1,0 +1,14 @@
+---
+- hosts: crowd
+  become: true
+
+  vars_files:
+    secrets.yml
+
+  vars:
+    db_name: "crowd"
+    db_user: "crowd"
+    db_pass: "{{ db_pass_crowd }}"
+    
+  roles:
+  - crowd  

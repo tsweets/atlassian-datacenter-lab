@@ -1,0 +1,6 @@
+---
+- hosts: labsupport
+  become: true
+
+  roles:
+  - root-ca

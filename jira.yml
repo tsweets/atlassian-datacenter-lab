@@ -1,0 +1,12 @@
+---
+- hosts: jira
+  become: true
+
+  vars:
+    db_name: "jira"
+    db_user: "jira"
+    db_pass: "{{ db_pass_jira }}"
+    
+  roles:
+  - database
+  - jira

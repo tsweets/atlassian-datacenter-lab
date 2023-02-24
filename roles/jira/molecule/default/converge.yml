@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include beer30.jira"
+      include_role:
+        name: "beer30.jira"

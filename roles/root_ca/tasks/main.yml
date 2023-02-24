@@ -1,0 +1,41 @@
+---
+# tasks file for root_ca
+- name: Install Deps
+  ansible.builtin.package:
+    name: python3-cryptography
+    state: present
+    
+- name: Create Cert directory if it does not exist
+  ansible.builtin.file:
+    path: /etc/pki/lab
+    state: directory
+    mode: '0755'
+
+- name: Create private key with password protection
+  community.crypto.openssl_privatekey:
+    path: /etc/pki/lab/ca-certificate-prv.key
+    passphrase: "{{ secret_ca_passphrase }}"
+    cipher: auto
+
+- name: Create certificate signing request (CSR) for CA certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/pki/lab/ca-certificate-prv.key
+    privatekey_passphrase: "{{ secret_ca_passphrase }}"
+    common_name: Atlassian Lab Root CA
+    use_common_name_for_san: false  # since we do not specify SANs, don't use CN as a SAN
+    basic_constraints:
+      - 'CA:TRUE'
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+    key_usage_critical: true
+  register: ca_csr
+
+- name: Create self-signed CA certificate from CSR
+  community.crypto.x509_certificate:
+    path: /etc/pki/lab/ca-certificate.pem
+    csr_content: "{{ ca_csr.csr }}"
+    privatekey_path: /etc/pki/lab/ca-certificate-prv.key
+    privatekey_passphrase: "{{ secret_ca_passphrase }}"
+    provider: selfsigned
+

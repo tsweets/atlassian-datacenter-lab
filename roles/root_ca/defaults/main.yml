@@ -1,0 +1,3 @@
+---
+# defaults file for root_ca
+#secret_ca_passphrase: "{{ ca-password }}"

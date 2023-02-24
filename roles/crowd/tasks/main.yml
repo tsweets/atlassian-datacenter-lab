@@ -1,0 +1,18 @@
+---
+# tasks file for crowd
+- name: Molecule Hello
+  debug:
+    msg: Hello - I am Crowd
+
+- name: Ensure Java 11 is installed
+  ansible.builtin.package:
+    name: java-11-openjdk
+    state: present
+
+
+- name: Create Atlassian Home/Data Directory if it does not exist
+  ansible.builtin.file:
+    path: /var/atlassian/crowd
+    state: directory
+    mode: '0755'  
+
