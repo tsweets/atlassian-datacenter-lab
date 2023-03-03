@@ -1,0 +1,8 @@
+---
+- name: "Enable 389 Module"
+  shell: "dnf module enable 389-ds -y"
+
+- name: Ensure 389 Directory Server is installed
+  ansible.builtin.package:
+    name:  '389-ds-base'
+    state: present
