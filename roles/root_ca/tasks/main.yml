@@ -2,7 +2,9 @@
 # tasks file for root_ca
 - name: Install Deps
   ansible.builtin.package:
-    name: python3-cryptography
+    name: 
+      - python3-cryptography
+      - openssl
     state: present
     
 - name: Create Cert directory if it does not exist

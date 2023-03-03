@@ -19,7 +19,7 @@
   shell: "postgresql-setup initdb"
   when: not postgres_data.stat.exists    
 
-- name: Start service httpd, if not started
+- name: Start service postgres, if not started
   ansible.builtin.service:
     name: postgresql
     state: started
