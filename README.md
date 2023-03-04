@@ -43,6 +43,8 @@ needed dnf install psycopg2 on the host - but this is in the playbook
 
 ansible-galaxy collection install community.crypto
 
+ansible-galaxy collection install community.general
+
 Jira doesn't work with the stock open jdk - had to install   https://adoptium.net/temurin/releases/?version=11  
 
 

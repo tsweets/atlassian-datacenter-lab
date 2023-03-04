@@ -6,8 +6,16 @@ driver:
 platforms:
   - name: instance
     image: quay.io/centos/centos:stream8
+   # image: geerlingguy/docker-centos8-ansible:latest
     pre_build_image: true
+    volumes:
+        - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
 provisioner:
   name: ansible
+  inventory:
+    group_vars:
+      all:
+        GLOBAL_PASSWD: completelybogus  
 verifier:
   name: ansible

@@ -1,8 +1,108 @@
 ---
+- name: Enable DNF Fastest Mirror
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/dnf.conf
+    regexp: '^fastestmirror='
+    line: fastestmirror=1
+
 - name: "Enable 389 Module"
   shell: "dnf module enable 389-ds -y"
+
+- name: Ensure deps are installed
+  ansible.builtin.package:
+    name:  
+      - 'python3-firewall'
+    state: present
+
 
 - name: Ensure 389 Directory Server is installed
   ansible.builtin.package:
     name:  '389-ds-base'
     state: present
+
+
+# - name: Open Firewall Port
+#   firewalld:
+#     service: ldap
+#     permanent: yes
+#     state: enabled
+#     immediate: yes   
+
+- name: Check if instance directory exists
+  stat:
+    path: "/var/lib/dirsrv/slapd-{{ dirsrv_serverid }}"
+  register: dirsrv_instance_dir
+
+- name: "Check if {{ dirsrv_serverid }} instance directory exists"
+  set_fact:
+    dirsrv_instance_dir_exists: "{{ dirsrv_instance_dir.stat.exists and dirsrv_instance_dir.stat.isdir }}"
+
+- block:
+  - name: Copy installation template
+    template:
+      src: templates/install-v2.inf.j2
+      dest: /tmp/install.inf
+      mode: '600'
+    when: not dirsrv_instance_dir_exists
+
+  - name: Run installation script (dscreate)
+    command: /usr/sbin/dscreate --verbose from-file /tmp/install.inf
+    become: true
+    when:
+      - not dirsrv_instance_dir_exists    
+
+- name: Start and enable 389DS {{ dirsrv_serverid }} instance
+  become: true
+  service:
+    name: "dirsrv@{{ dirsrv_serverid }}"
+    state: started
+    enabled: yes
+
+- name: Enable systemd target
+  become: true
+  service:
+    name: dirsrv.target
+    enabled: yes
+
+- name: Make sure we have an devops group
+  community.general.ldap_entry:
+    state: present
+    server_uri: ldap://localhost/
+    bind_dn: cn=Directory Manager
+    bind_pw: "{{ GLOBAL_PASSWD }}"
+    dn: cn=devops,ou=groups,dc=devops,dc=local
+    objectClass:
+      - top
+      - groupOfNames
+      - posixGroup
+      - nsMemberOf
+    attributes:
+      cn: devops
+      gidNumber: 5000
+
+- name: Make sure we have an devops service account
+  community.general.ldap_entry:
+#    loginShell: /bin/false
+    state: present
+    server_uri: ldap://localhost/
+    bind_dn: cn=Directory Manager
+    bind_pw: "{{ GLOBAL_PASSWD }}"
+    dn: uid=devops,ou=people,dc=devops,dc=local
+    objectClass:
+      - top
+      - nsPerson
+      - nsAccount
+      - nsOrgPerson
+      - posixAccount
+    attributes:
+ #     description: DevOps Service Account
+ #     userPassword: "devops"
+ #     cn: DevOps Acct
+ #     sn: Acct
+      cn: DevOps Acct
+      displayName: Devops Acct
+      homeDirectory: /var/empty
+      uidNumber: 4000
+      gidNumber: 5000
+      userPassword: "{{ GLOBAL_PASSWD }}"
+      #mail: devops@devops.local
