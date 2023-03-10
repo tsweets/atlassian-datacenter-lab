@@ -1,12 +1,54 @@
 ---
-- hosts: jira
+- name: Jira Playbook
+  hosts: jira
   become: true
+
+  vars_files:
+    secrets.yml
 
   vars:
     db_name: "jira"
     db_user: "jira"
     db_pass: "{{ db_pass_jira }}"
-    
+    nginx_vhosts:
+      - listen: "443 ssl http2"
+        server_name: "jira.atlassian.rhel.lab"
+        root: "/var/www/jira.atlassian.rhel.lab"
+        index: "index.php index.html index.htm"
+
+        access_log: "/var/log/nginx/access.log"
+        error_log: "/var/log/nginx/error.log"
+        state: "present"
+        template: "{{ nginx_vhost_template }}"
+        filename: "nginx_proxy.conf"
+        extra_parameters: |
+          location / {
+            proxy_pass http://127.0.0.1:8080;
+            proxy_set_header    Host            $host;
+            proxy_set_header    X-Real-IP       $remote_addr;
+            proxy_set_header    X-Forwarded-for $remote_addr;
+            proxy_redirect      off;
+          }
+          ssl_certificate     /etc/pki/tls/certs/jira-certificate.pem;
+          ssl_certificate_key /etc/pki/tls/certs/jira-certificate-prv.key;
+          ssl_protocols       TLSv1.1 TLSv1.2;
+          ssl_ciphers         HIGH:!aNULL:!MD5;
+
+
+  pre_tasks:
+    - name: Copy private cert from lab support
+      ansible.builtin.get_url:
+        url: http://labsupport.atlassian.rhel.lab/root-ca/jira-certificate-prv.key
+        dest: /etc/pki/tls/certs
+        mode: '0440'
+
+    - name: Copy public cert from lab support
+      ansible.builtin.get_url:
+        url: http://labsupport.atlassian.rhel.lab/root-ca/jira-certificate.pem
+        dest: /etc/pki/tls/certs
+        mode: '0440'
+
   roles:
-  - database
-  - jira
+    - database
+    - jira
+    - nginx_proxy

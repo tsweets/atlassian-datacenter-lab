@@ -1,2 +1,14 @@
 ---
 # tasks file for java
+- name: Add Adoptium Java Repository
+  ansible.builtin.yum_repository:
+    name: Adoptium
+    description: Adoptium Java
+    baseurl: https://packages.adoptium.net/artifactory/rpm/centos/$releasever/$basearch
+    gpgcheck: yes
+    gpgkey: https://packages.adoptium.net/artifactory/api/gpg/key/public
+
+- name: Ensure Temurin Java 11  is installed
+  ansible.builtin.package:
+    name: temurin-11-jdk
+    state: present  

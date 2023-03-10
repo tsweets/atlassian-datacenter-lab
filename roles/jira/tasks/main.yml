@@ -16,3 +16,20 @@
     state: directory
     mode: '0755'  
 
+
+# TODO: Missing Install - did a manual install
+
+- name: Configure Tomact.
+  template:
+    src: server.xml.j2
+    dest: /opt/atlassian-jira-software-9.6.0-standalone/conf/server.xml
+    owner: root
+    group: "{{ root_group }}"
+    mode: 0644
+
+- name: allow /usr/sbin/nginx to connect to network port 8095 (setsebool -P httpd_can_network_connect 1)
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+  

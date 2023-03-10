@@ -1,0 +1,45 @@
+---
+# tasks file for confluence
+- name: Create Atlassian Home/Data Directory if it does not exist
+  ansible.builtin.file:
+    path: /var/atlassian/confluence
+    state: directory
+    mode: '0755'  
+
+
+# TODO: Missing Install - did a manual install
+
+- name: Configure Tomact.
+  template:
+    src: server.xml.j2
+    dest: /opt/atlassian-confluence-8.1.1/conf/server.xml
+    owner: root
+    group: "{{ root_group }}"
+    mode: 0644
+
+- name: allow /usr/sbin/nginx to connect to local network port  (setsebool -P httpd_can_network_connect 1)
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+
+- name: Open Firewall HTTPS Ports
+  ansible.posix.firewalld:
+    service: https
+    permanent: yes
+    state: enabled
+    immediate: yes   
+ 
+- name: Open Firewall Port 8090 (Confluence)
+  ansible.posix.firewalld:
+    port: 8090/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes   
+
+- name: Open Firewall Port 8091 (Confluence)
+  ansible.posix.firewalld:
+    port: 8091/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes   

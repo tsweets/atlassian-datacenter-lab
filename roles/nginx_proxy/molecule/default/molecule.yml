@@ -1,0 +1,19 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    hostname: centos
+    image: mpaivabarbosa/molecule-systemd-centos:7
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+    override_command: false
+
+provisioner:
+  name: ansible
+verifier:
+  name: ansible

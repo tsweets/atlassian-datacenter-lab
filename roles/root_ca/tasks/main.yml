@@ -41,3 +41,105 @@
     privatekey_passphrase: "{{ secret_ca_passphrase }}"
     provider: selfsigned
 
+- name: Create Crowd CSR signing key
+  openssl_privatekey:
+    path: /etc/pki/lab/crowd-certificate-prv.key
+    mode: 0644
+
+- name: Create CSR for crowd
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/pki/lab/crowd-certificate-prv.key
+    common_name: crowd.atlassian.rhel.lab
+    organization_name: Atlassian Lab
+    subject_alt_name:
+      - "DNS:crowd.atlassian.rhel.lab"
+      - "DNS:crowd"
+  register: crowd_csr
+
+- name: Create Crowd certificate from CSR
+  community.crypto.x509_certificate:
+    path: /etc/pki/lab/crowd-certificate.pem
+    csr_content: "{{ crowd_csr.csr }}"
+    privatekey_path: /etc/pki/lab/crowd-certificate-prv.key
+    ownca_path: /etc/pki/lab/ca-certificate.pem
+    ownca_privatekey_path: /etc/pki/lab/ca-certificate-prv.key
+    ownca_privatekey_passphrase: "{{ secret_ca_passphrase }}"
+    provider: ownca
+
+
+- name: Create Jira CSR signing key
+  openssl_privatekey:
+    path: /etc/pki/lab/jira-certificate-prv.key
+    mode: 0644
+
+- name: Create CSR for Jira
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/pki/lab/jira-certificate-prv.key
+    common_name: jira.atlassian.rhel.lab
+    organization_name: Atlassian Lab
+    subject_alt_name:
+      - "DNS:jira.atlassian.rhel.lab"
+      - "DNS:jira"
+  register: jira_csr
+
+- name: Create Jira certificate from CSR
+  community.crypto.x509_certificate:
+    path: /etc/pki/lab/jira-certificate.pem
+    csr_content: "{{ jira_csr.csr }}"
+    privatekey_path: /etc/pki/lab/jira-certificate-prv.key
+    ownca_path: /etc/pki/lab/ca-certificate.pem
+    ownca_privatekey_path: /etc/pki/lab/ca-certificate-prv.key
+    ownca_privatekey_passphrase: "{{ secret_ca_passphrase }}"
+    provider: ownca
+
+- name: Create Bitbucket CSR signing key
+  openssl_privatekey:
+    path: /etc/pki/lab/bitbucket-certificate-prv.key
+    mode: 0644
+
+- name: Create CSR for Bitbucket
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/pki/lab/bitbucket-certificate-prv.key
+    common_name: bitbucket.atlassian.rhel.lab
+    organization_name: Atlassian Lab
+    subject_alt_name:
+      - "DNS:bitbucket.atlassian.rhel.lab"
+      - "DNS:bitbucket"
+      - "IP:10.220.1.83"
+  register: bitbucket_csr
+
+- name: Create Bitbucket certificate from CSR
+  community.crypto.x509_certificate:
+    path: /etc/pki/lab/bitbucket-certificate.pem
+    csr_content: "{{ bitbucket_csr.csr }}"
+    privatekey_path: /etc/pki/lab/bitbucket-certificate-prv.key
+    ownca_path: /etc/pki/lab/ca-certificate.pem
+    ownca_privatekey_path: /etc/pki/lab/ca-certificate-prv.key
+    ownca_privatekey_passphrase: "{{ secret_ca_passphrase }}"
+    provider: ownca
+
+- name: Create Confluence CSR signing key
+  openssl_privatekey:
+    path: /etc/pki/lab/confluence-certificate-prv.key
+    mode: 0644
+
+- name: Create CSR for Confluence
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/pki/lab/confluence-certificate-prv.key
+    common_name: confluence.atlassian.rhel.lab
+    organization_name: Atlassian Lab
+    subject_alt_name:
+      - "DNS:confluence.atlassian.rhel.lab"
+      - "DNS:confluence"
+      - "IP:10.220.1.82"
+  register: confluence_csr
+
+- name: Create Confluence certificate from CSR
+  community.crypto.x509_certificate:
+    path: /etc/pki/lab/confluence-certificate.pem
+    csr_content: "{{ confluence_csr.csr }}"
+    privatekey_path: /etc/pki/lab/confluence-certificate-prv.key
+    ownca_path: /etc/pki/lab/ca-certificate.pem
+    ownca_privatekey_path: /etc/pki/lab/ca-certificate-prv.key
+    ownca_privatekey_passphrase: "{{ secret_ca_passphrase }}"
+    provider: ownca

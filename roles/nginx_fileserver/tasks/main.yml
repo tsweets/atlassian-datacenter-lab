@@ -1,0 +1,27 @@
+---
+# tasks file for nginx_fileserver
+- name: Open Firewall Port
+  ansible.posix.firewalld:
+    service: http
+    permanent: yes
+    state: enabled
+    immediate: yes   
+
+- name: Install NGINX 
+  ansible.builtin.package:
+    name: "nginx"
+    state: present
+
+- name: copy nginx config file
+  copy: src=files/nginx.conf dest=/etc/nginx/    
+
+- name: Create a symbolic link to root certs
+  ansible.builtin.file:
+    src: /etc/pki/lab
+    dest: /usr/share/nginx/html/root-ca
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted

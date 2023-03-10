@@ -16,3 +16,19 @@
     state: directory
     mode: '0755'  
 
+# TODO: Missing Install - did a manual install
+
+- name: Configure Tomact.
+  template:
+    src: server.xml.j2
+    dest: /opt/atlassian-crowd-5.1.2/apache-tomcat/conf/server.xml
+    owner: root
+    group: "{{ root_group }}"
+    mode: 0644
+
+- name: allow /usr/sbin/nginx to connect to network port 8095 (setsebool -P httpd_can_network_connect 1)
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+  

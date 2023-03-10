@@ -21,12 +21,12 @@
     state: present
 
 
-# - name: Open Firewall Port
-#   firewalld:
-#     service: ldap
-#     permanent: yes
-#     state: enabled
-#     immediate: yes   
+- name: Open Firewall Port
+  ansible.posix.firewalld:
+    service: ldap
+    permanent: yes
+    state: enabled
+    immediate: yes   
 
 - name: Check if instance directory exists
   stat:

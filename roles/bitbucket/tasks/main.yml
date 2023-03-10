@@ -1,0 +1,74 @@
+---
+# tasks file for bitbucket
+- name: Molecule Hello
+  debug:
+    msg: Hello - I am Bitbucket
+
+# - name: Ensure Java 11 is installed
+#   ansible.builtin.package:
+#     name: java-11-openjdk
+#     state: present
+
+- name: Ensure git is installed
+  ansible.builtin.package:
+    name: git
+    state: present
+
+- name: Create Atlassian Home/Data Directory if it does not exist
+  ansible.builtin.file:
+    path: /var/atlassian/bitbucket
+    state: directory
+    mode: '0755'  
+
+
+# TODO: Missing Install - did a manual install
+
+# - name: Configure Tomact.
+#   template:
+#     src: server.xml.j2
+#     dest: /opt/atlassian-bitbucket-8.8.2/conf/server.xml
+#     owner: root
+#     group: "{{ root_group }}"
+#     mode: 0644
+
+- name: Configure Tomcat.
+  template:
+    src: bitbucket.properties.j2
+    dest: /var/atlassian/bitbucket/shared/bitbucket.properties
+    owner: root
+    group: "{{ root_group }}"
+    mode: 0644
+
+- name: allow /usr/sbin/nginx to connect to local network port  (setsebool -P httpd_can_network_connect 1)
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+
+- name: Open Firewall HTTPS Ports
+  ansible.posix.firewalld:
+    service: https
+    permanent: yes
+    state: enabled
+    immediate: yes   
+ 
+- name: Open Firewall Port 7900 (Bitbucket)
+  ansible.posix.firewalld:
+    port: 7990/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes   
+
+- name: Open Firewall Port 7992 (Bitbucket)
+  ansible.posix.firewalld:
+    port: 7992/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes   
+
+- name: Open Firewall Port 7993 (Bitbucket)
+  ansible.posix.firewalld:
+    port: 7993/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes   

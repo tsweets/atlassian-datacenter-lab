@@ -1,6 +1,13 @@
 ---
-- hosts: labsupport
+- hosts: lab_support
   become: true
 
+  vars_files:
+    secrets.yml
+
   roles:
-  - root-ca
+  - root_ca
+ # - ldap
+  #- nginx_fileserver
+
+ 
